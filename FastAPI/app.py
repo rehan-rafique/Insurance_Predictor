@@ -1,15 +1,17 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, computed_field, field_validator
 from typing import Literal, Annotated
 import pickle
 import pandas as pd
 
 # Import ML model (Pickle)
 with open(
-    "E:\Python\Virtual Environment\FastAPI\Insurance_Predictor\model.pkl", "rb"
+    "E:\Python\Virtual Environment\Insurance_Predictor\Model\model.pkl", "rb"
 ) as f:
     model = pickle.load(f)
+
+MODEL_VERSION = "1.0.0"
 
 app = FastAPI()
 
@@ -97,6 +99,12 @@ class UserInput(BaseModel):
         Field(..., description="Occupation of the user"),
     ]
 
+    @field_validator("city")
+    @classmethod
+    def normalize_city(cls, v: str) -> str:
+        v = v.strip().title()
+        return v
+
     @computed_field
     @property
     def bmi(self) -> float:
@@ -132,6 +140,16 @@ class UserInput(BaseModel):
             return 2
         else:
             return 3
+
+
+@app.get("/")
+def home():
+    return {"message": "Insurance Premium Prediction API"}
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "Ok", "version": MODEL_VERSION, "model_loaded": model is not None}
 
 
 @app.post("/predict")
