@@ -6,24 +6,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-import pickle
-import pandas as pd
 from Schema.user_input import UserInput
-
-# Import ML model (Pickle)
-# with open(
-#     "E:\Python\Virtual Environment\Insurance_Predictor\Model\model.pkl", "rb"
-# ) as f:
-#     model = pickle.load(f)
-
-# Load model using relative path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(current_dir, "..", "Model", "model.pkl")
-
-with open(model_path, "rb") as f:
-    model = pickle.load(f)
-
-MODEL_VERSION = "1.0.0"
+from Model.predict import predict_output, MODEL_VERSION, model
 
 app = FastAPI()
 
@@ -41,18 +25,18 @@ def health_check():
 @app.post("/predict")
 def predict_premium(data: UserInput):
 
-    input_df = pd.DataFrame(
-        [
-            {
-                "bmi": data.bmi,
-                "age_group": data.age_group,
-                "lifestyle_risk": data.lifestyle_risk,
-                "city_tier": data.city_tier,
-                "income_lpa": data.income_lpa,
-                "occupation": data.occupation,
-            }
-        ]
-    )
+    user_input = {
+        "bmi": data.bmi,
+        "age_group": data.age_group,
+        "lifestyle_risk": data.lifestyle_risk,
+        "city_tier": data.city_tier,
+        "income_lpa": data.income_lpa,
+        "occupation": data.occupation,
+    }
 
-    prediction = model.predict(input_df)[0]
+    print(type(user_input))
+    print(user_input)
+
+    prediction = predict_output(user_input)
+
     return JSONResponse(status_code=200, content={"predicted_category": prediction})
