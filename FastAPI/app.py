@@ -34,9 +34,11 @@ def predict_premium(data: UserInput):
         "occupation": data.occupation,
     }
 
-    print(type(user_input))
-    print(user_input)
+    try:
 
-    prediction = predict_output(user_input)
+        prediction = predict_output(user_input)
 
-    return JSONResponse(status_code=200, content={"predicted_category": prediction})
+        return JSONResponse(status_code=200, content={"predicted_category": prediction})
+
+    except Exception as e:
+        return JSONResponse(status_code=500, content=str(e))
