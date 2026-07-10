@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Add the Insurance_Predictor directory to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 import pickle
@@ -5,9 +11,16 @@ import pandas as pd
 from Schema.user_input import UserInput
 
 # Import ML model (Pickle)
-with open(
-    "E:\Python\Virtual Environment\Insurance_Predictor\Model\model.pkl", "rb"
-) as f:
+# with open(
+#     "E:\Python\Virtual Environment\Insurance_Predictor\Model\model.pkl", "rb"
+# ) as f:
+#     model = pickle.load(f)
+
+# Load model using relative path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(current_dir, "..", "Model", "model.pkl")
+
+with open(model_path, "rb") as f:
     model = pickle.load(f)
 
 MODEL_VERSION = "1.0.0"
